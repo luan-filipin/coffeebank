@@ -26,11 +26,13 @@ import br.com.api.coffebank.config.GlobalExceptionHandler;
 import br.com.api.coffebank.dto.CriarClienteDadosPessoaisDto;
 import br.com.api.coffebank.dto.CriarClienteDto;
 import br.com.api.coffebank.dto.CriarClienteEnderecoDto;
-import br.com.api.coffebank.dto.resposta.RespostaCriacaoClienteDadosPessoaisDto;
-import br.com.api.coffebank.dto.resposta.RespostaCriacaoClienteDto;
-import br.com.api.coffebank.dto.resposta.RespostaCriacaoClienteEnderecoDto;
+import br.com.api.coffebank.dto.resposta.RespostaClienteDadosPessoaisDto;
+import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
+import br.com.api.coffebank.dto.resposta.RespostaClienteEnderecoDto;
 import br.com.api.coffebank.entity.TipoSexo;
 import br.com.api.coffebank.service.ClienteService;
+import static org.hamcrest.Matchers.containsString;
+
 
 @WebMvcTest(ClienteController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -50,13 +52,15 @@ class ClienteControllerTest {
 	@Test
 	void deveCriarClienteComSucesso() throws Exception{
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+		
+		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
 		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 	
-		RespostaCriacaoClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaCriacaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
-		RespostaCriacaoClienteEnderecoDto dtoEnderecoEsperado = new RespostaCriacaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		RespostaCriacaoClienteDto dtoEsperado = new RespostaCriacaoClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
+		RespostaClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RespostaClienteEnderecoDto dtoEnderecoEsperado = new RespostaClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RespostaClienteDto dtoEsperado = new RespostaClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
 		
 		when(clienteService.criarCliente(dtoEntrada)).thenReturn(dtoEsperado);
 		
@@ -74,7 +78,9 @@ class ClienteControllerTest {
 	@Test
 	void deveLancarExceptionSeCampoForNulloOuAusente() throws Exception{
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
+		LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+		
+		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
 		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 		
@@ -89,4 +95,38 @@ class ClienteControllerTest {
 		.andExpect(jsonPath("$.erros[0].campo").value("dadosPessoais.nome"))
 		.andExpect(jsonPath("$.erros[0].mensagem").value("O campo 'nome' é obrigatorio!"));
 	}
+	
+	@DisplayName("GET - Deve buscar o cliente pelo codigo do cliente com sucesso.")
+	@Test
+	void deveBuscarClientePeloCodigoComSucesso() throws Exception{
+		
+		Long codigoCliente = 1L;
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+		
+		RespostaClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RespostaClienteEnderecoDto dtoEnderecoEsperado = new RespostaClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RespostaClienteDto dtoEsperado = new RespostaClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
+		
+		when(clienteService.buscarClientePeloCodigo(codigoCliente)).thenReturn(dtoEsperado);
+		
+		mockMvc.perform(get("/api/cliente")
+				.param("codigo", String.valueOf(codigoCliente)))
+		.andExpect(status().isOk())
+        .andExpect(jsonPath("$.codigoCliente").value(1L))
+        .andExpect(jsonPath("$.dadosPessoais.nome").value("Luan"))
+        .andExpect(jsonPath("$.dadosPessoais.email").value("teste@teste.com"))
+        .andExpect(jsonPath("$.dadosPessoais.sexo").value("MASCULINO"))
+        .andExpect(jsonPath("$.dadosPessoais.cpf").value("12345678910"));
+	}
+	
+	@DisplayName("GET - Deve lançar exception se o campo estiver ausente.")
+	@Test
+	void deveLancarExceptionSeCampoEstiveAusente() throws Exception{
+
+	    mockMvc.perform(get("/api/cliente"))
+        .andExpect(status().isBadRequest())
+        .andExpect(status().reason(containsString("Required parameter 'codigo' is not present")));
+	}
+	
+	
 }
