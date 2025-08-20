@@ -24,4 +24,10 @@ public class ClienteValidador {
 		return clienteRepository.findByCodigoCliente(codigo).orElseThrow(CodigoInexistenteException::new);
 	}
 	
+	public void validaSeOCodigoExisteMasNaoRetornaEntity(Long codigo) {
+		if(!clienteRepository.existsById(codigo)) {
+			throw new CodigoInexistenteException();
+		}
+	}
+	
 }
