@@ -1,6 +1,6 @@
 package br.com.api.coffebank.dto.resposta;
 
-public record RespostaCriacaoClienteEnderecoDto(
+public record RespostaClienteEnderecoDto(
 		String rua,
 		String numero,
 		String bairro,

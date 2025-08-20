@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import br.com.api.coffebank.entity.TipoSexo;
 
-public record RespostaCriacaoClienteDadosPessoaisDto(
+public record RespostaClienteDadosPessoaisDto(
 		String nome,
 		String email,
 		TipoSexo sexo,
