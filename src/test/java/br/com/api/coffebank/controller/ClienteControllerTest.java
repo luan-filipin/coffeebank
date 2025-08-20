@@ -1,5 +1,7 @@
 package br.com.api.coffebank.controller;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -23,9 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.api.coffebank.config.GlobalExceptionHandler;
-import br.com.api.coffebank.dto.CriarClienteDadosPessoaisDto;
-import br.com.api.coffebank.dto.CriarClienteDto;
-import br.com.api.coffebank.dto.CriarClienteEnderecoDto;
+import br.com.api.coffebank.dto.RequisicaoClienteDadosPessoaisDto;
+import br.com.api.coffebank.dto.RequisicaoClienteDto;
+import br.com.api.coffebank.dto.RequisicaoClienteEnderecoDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDadosPessoaisDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteEnderecoDto;
@@ -54,9 +56,9 @@ class ClienteControllerTest {
 		
 	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
-		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 	
 		RespostaClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		RespostaClienteEnderecoDto dtoEnderecoEsperado = new RespostaClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
@@ -80,9 +82,9 @@ class ClienteControllerTest {
 		
 		LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
-		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 		
 		mockMvc.perform(post("/api/cliente")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -125,8 +127,37 @@ class ClienteControllerTest {
 
 	    mockMvc.perform(get("/api/cliente"))
         .andExpect(status().isBadRequest())
-        .andExpect(status().reason(containsString("Required parameter 'codigo' is not present")));
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(jsonPath("$.mensagem").value("O parâmetro 'codigo' é obrigatório!"))
+        .andExpect(jsonPath("$.path").value("/api/cliente"))
+        .andExpect(jsonPath("$.timestamp").exists());
+	
 	}
 	
+	@DisplayName("DELETE - Deve deletar cliente com sucesso pelo codigo.")
+	@Test
+	void deveDeletarClientePeloCodigoComSucesso()throws Exception{
+		
+		Long codigoCliente = 1L;
+		
+		doNothing().when(clienteService).deletaClientePeloCodigo(codigoCliente);
+		
+		mockMvc.perform(delete("/api/cliente")
+				.param("codigo", String.valueOf(codigoCliente)))
+		.andExpect(status().isNoContent());
+	}
+	
+	@DisplayName("DELETE - Deve lançar exception caso nao tenha o parametro codigo.")
+	@Test
+	void deveLancarExceptionSeCodigoForAusente() throws Exception{
+		
+		mockMvc.perform(delete("/api/cliente"))
+		.andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(jsonPath("$.mensagem").value("O parâmetro 'codigo' é obrigatório!"))
+        .andExpect(jsonPath("$.path").value("/api/cliente"))
+        .andExpect(jsonPath("$.timestamp").exists());	
+		
+	}
 	
 }
