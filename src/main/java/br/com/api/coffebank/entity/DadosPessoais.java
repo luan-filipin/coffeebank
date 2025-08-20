@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +23,7 @@ public class DadosPessoais {
 	private String email;
 	
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private TipoSexo sexo;
 	
 	@Column(nullable = false, unique = true)
