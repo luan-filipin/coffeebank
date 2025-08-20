@@ -1,12 +1,14 @@
 package br.com.api.coffebank.service;
 
-import br.com.api.coffebank.dto.CriarClienteDto;
+import br.com.api.coffebank.dto.RequisicaoClienteDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
 
 public interface ClienteService {
 
-	RespostaClienteDto criarCliente(CriarClienteDto dto);
+	RespostaClienteDto criarCliente(RequisicaoClienteDto dto);
 	
 	RespostaClienteDto buscarClientePeloCodigo(Long codigo);
+	
+	void deletaClientePeloCodigo(Long codigo);
 	
 }

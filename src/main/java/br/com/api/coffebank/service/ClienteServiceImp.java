@@ -2,7 +2,7 @@ package br.com.api.coffebank.service;
 
 import org.springframework.stereotype.Service;
 
-import br.com.api.coffebank.dto.CriarClienteDto;
+import br.com.api.coffebank.dto.RequisicaoClienteDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
 import br.com.api.coffebank.entity.Cliente;
 import br.com.api.coffebank.mapper.ClienteMapper;
@@ -21,7 +21,7 @@ public class ClienteServiceImp implements ClienteService{
 	
 	@Transactional
 	@Override
-	public RespostaClienteDto criarCliente(CriarClienteDto dto) {
+	public RespostaClienteDto criarCliente(RequisicaoClienteDto dto) {
 		clienteValidador.validaSeCpfJaExiste(dto.dadosPessoais().cpf());
 		Cliente cliente = clienteMapper.toEntity(dto);
 		clienteRepository.save(cliente);
@@ -32,5 +32,13 @@ public class ClienteServiceImp implements ClienteService{
 	public RespostaClienteDto buscarClientePeloCodigo(Long codigo) {
 		return clienteMapper.toDto(clienteValidador.validaSeOCodigoDoClienteExiste(codigo));
 	}
+
+	@Transactional
+	@Override
+	public void deletaClientePeloCodigo(Long codigo) {
+		clienteValidador.validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
+		clienteRepository.deleteById(codigo);
+	}
+
 
 }
