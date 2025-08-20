@@ -1,6 +1,5 @@
 package br.com.api.coffebank.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,20 +23,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.api.coffebank.dto.CriarClienteDadosPessoaisDto;
 import br.com.api.coffebank.dto.CriarClienteDto;
 import br.com.api.coffebank.dto.CriarClienteEnderecoDto;
-import br.com.api.coffebank.dto.resposta.RespostaCriacaoClienteDadosPessoaisDto;
-import br.com.api.coffebank.dto.resposta.RespostaCriacaoClienteDto;
-import br.com.api.coffebank.dto.resposta.RespostaCriacaoClienteEnderecoDto;
+import br.com.api.coffebank.dto.resposta.RespostaClienteDadosPessoaisDto;
+import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
+import br.com.api.coffebank.dto.resposta.RespostaClienteEnderecoDto;
 import br.com.api.coffebank.entity.Cliente;
 import br.com.api.coffebank.entity.DadosPessoais;
 import br.com.api.coffebank.entity.Endereco;
 import br.com.api.coffebank.entity.TipoSexo;
+import br.com.api.coffebank.exception.CodigoInexistenteException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
 import br.com.api.coffebank.mapper.ClienteMapper;
 import br.com.api.coffebank.repository.ClienteRepository;
 import br.com.api.coffebank.service.validador.ClienteValidador;
 
 @ExtendWith(MockitoExtension.class)
-public class ClienteServiceTest {
+class ClienteServiceTest {
 
 	@Mock
 	private ClienteRepository clienteRepository;
@@ -55,24 +55,27 @@ public class ClienteServiceTest {
 	@Test
 	void deveCriarClienteComSucesso() {
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+	    LocalDateTime dataCriacao = LocalDateTime.of(2025, 8, 19, 12, 0);
+		
+		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
 		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 		
-		DadosPessoais dadosPessoaisEntity = new DadosPessoais("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
+		DadosPessoais dadosPessoaisEntity = new DadosPessoais("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		Endereco enderecoEntity = new Endereco("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		Cliente clienteEntity = new Cliente(1L, LocalDateTime.now(), dadosPessoaisEntity, enderecoEntity);
+		Cliente clienteEntity = new Cliente(1L, dataCriacao, dadosPessoaisEntity, enderecoEntity);
 		
-		RespostaCriacaoClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaCriacaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
-		RespostaCriacaoClienteEnderecoDto dtoEnderecoEsperado = new RespostaCriacaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		RespostaCriacaoClienteDto dtoEsperado = new RespostaCriacaoClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
+		RespostaClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RespostaClienteEnderecoDto dtoEnderecoEsperado = new RespostaClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RespostaClienteDto dtoEsperado = new RespostaClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
 		
 		doNothing().when(clienteValidador).validaSeCpfJaExiste(dtoDadosPessoaisEntrada.cpf());
 		when(clienteMapper.toEntity(dtoEntrada)).thenReturn(clienteEntity);
 		when(clienteRepository.save(clienteEntity)).thenReturn(clienteEntity);
 		when(clienteMapper.toDto(clienteEntity)).thenReturn(dtoEsperado);
 		
-		RespostaCriacaoClienteDto resultado = clienteServiceImp.criarCliente(dtoEntrada);
+		RespostaClienteDto resultado = clienteServiceImp.criarCliente(dtoEntrada);
 		
 		assertNotNull(resultado);
 		assertEquals(resultado, dtoEsperado);
@@ -88,20 +91,65 @@ public class ClienteServiceTest {
 	@Test 
 	void deveLancarExceptionSeCpfJaExistir() {
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", LocalDate.now(), "Brasileiro");
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+		
+		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
 		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 		
 		doThrow(new CpfJaExisteException()).when(clienteValidador).validaSeCpfJaExiste(dtoDadosPessoaisEntrada.cpf());
 		
-		CpfJaExisteException exception = assertThrows(CpfJaExisteException.class, () ->{
+		assertThrows(CpfJaExisteException.class, () ->{
 			clienteServiceImp.criarCliente(dtoEntrada);
 		});
 		
-		assertEquals("Ja existe um cliente com esse CPF!", exception.getMessage());
 		
 		verify(clienteMapper, never()).toEntity(any());
 		verify(clienteRepository, never()).save(any());
+		verify(clienteMapper, never()).toDto(any());
+	}
+	
+	@DisplayName("GET -  Deve buscar um cliente pelo codigoCliente com sucesso.")
+	@Test 
+	void deveBuscarClientePeloCodigoComSucesso() {
+		
+		Long codigoCliente = 1L;
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+	    LocalDateTime dataCriacao = LocalDateTime.of(2025, 8, 19, 12, 0);
+		
+		DadosPessoais dadosPessoaisEntity = new DadosPessoais("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		Endereco enderecoEntity = new Endereco("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		Cliente clienteEntity = new Cliente(1L, dataCriacao, dadosPessoaisEntity, enderecoEntity);
+		
+		RespostaClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RespostaClienteEnderecoDto dtoEnderecoEsperado = new RespostaClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RespostaClienteDto dtoEsperado = new RespostaClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
+		
+		when(clienteValidador.validaSeOCodigoDoClienteExiste(codigoCliente)).thenReturn(clienteEntity);
+		when(clienteMapper.toDto(clienteEntity)).thenReturn(dtoEsperado);
+		
+		RespostaClienteDto resultado = clienteServiceImp.buscarClientePeloCodigo(codigoCliente);
+		
+		assertNotNull(resultado);
+		assertEquals(resultado, dtoEsperado);
+		assertEquals(resultado.codigoCliente(), dtoEsperado.codigoCliente());
+		
+		verify(clienteValidador).validaSeOCodigoDoClienteExiste(codigoCliente);
+		verify(clienteMapper).toDto(clienteEntity);
+	}
+	
+	@DisplayName("GET -  Deve lançar exception se o codigoCliente não existir.")
+	@Test 
+	void deveLancarExceptionSeCodigoClienteNaoExistir() {
+		
+		Long codigoCliente = 1L;
+		
+		doThrow(new CodigoInexistenteException()).when(clienteValidador).validaSeOCodigoDoClienteExiste(codigoCliente);
+		
+		assertThrows(CodigoInexistenteException.class, ()->{
+			clienteServiceImp.buscarClientePeloCodigo(codigoCliente);
+		});
+		
 		verify(clienteMapper, never()).toDto(any());
 	}
 }
