@@ -20,9 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import br.com.api.coffebank.dto.CriarClienteDadosPessoaisDto;
-import br.com.api.coffebank.dto.CriarClienteDto;
-import br.com.api.coffebank.dto.CriarClienteEnderecoDto;
+import br.com.api.coffebank.dto.RequisicaoClienteDadosPessoaisDto;
+import br.com.api.coffebank.dto.RequisicaoClienteDto;
+import br.com.api.coffebank.dto.RequisicaoClienteEnderecoDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDadosPessoaisDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteEnderecoDto;
@@ -58,9 +58,9 @@ class ClienteServiceTest {
 	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
 	    LocalDateTime dataCriacao = LocalDateTime.of(2025, 8, 19, 12, 0);
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
-		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 		
 		DadosPessoais dadosPessoaisEntity = new DadosPessoais("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
 		Endereco enderecoEntity = new Endereco("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
@@ -93,9 +93,9 @@ class ClienteServiceTest {
 		
 	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
 		
-		CriarClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new CriarClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
-		CriarClienteEnderecoDto dtoEnderecoEntrada = new CriarClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
-		CriarClienteDto dtoEntrada = new CriarClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
 		
 		doThrow(new CpfJaExisteException()).when(clienteValidador).validaSeCpfJaExiste(dtoDadosPessoaisEntrada.cpf());
 		
@@ -151,5 +151,35 @@ class ClienteServiceTest {
 		});
 		
 		verify(clienteMapper, never()).toDto(any());
+	}
+	
+	@DisplayName("DELETE -  Deve deletar um cliente com sucesso.")
+	@Test 
+	void deveDeletarClienteComSucesso() {
+		
+		Long codigo = 1L;
+		
+		doNothing().when(clienteValidador).validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
+		doNothing().when(clienteRepository).deleteById(codigo);
+		
+		clienteServiceImp.deletaClientePeloCodigo(codigo);
+		
+		verify(clienteValidador).validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
+		verify(clienteRepository).deleteById(codigo);
+	}
+	
+	@DisplayName("DELETE -  Deve lançar exception se o cliente nao existir.")
+	@Test 
+	void deveLancarExceptionSeClienteNaoExistir() {
+		Long codigo = 1L;
+		
+		doThrow(new CodigoInexistenteException()).when(clienteValidador).validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
+		
+		assertThrows(CodigoInexistenteException.class, ()->{
+			clienteServiceImp.deletaClientePeloCodigo(codigo);
+		});
+		
+		verify(clienteRepository, never()).deleteById(any());
+				
 	}
 }
