@@ -18,6 +18,8 @@ public class ConfigSecurity {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.POST, "/api/cliente").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/cliente").permitAll()
+						.requestMatchers(HttpMethod.DELETE, "/api/cliente").permitAll()
 						.anyRequest().authenticated()
 						)
 				.build();
