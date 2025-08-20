@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -83,5 +84,15 @@ public class GlobalExceptionHandler {
 		
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
 	}
+	
+	//Esse Handler é disparado quando um parâmentro obrigatorio nao é enviado.
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErroRespostaDto> handleMissingParam(MissingServletRequestParameterException ex, HttpServletRequest request) {
+        ErroRespostaDto erro = new ErroRespostaDto(
+                "O parâmetro '" + ex.getParameterName() + "' é obrigatório!",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+    }
 
 }
