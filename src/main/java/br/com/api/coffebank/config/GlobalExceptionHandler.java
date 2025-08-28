@@ -4,14 +4,15 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import br.com.api.coffebank.dto.resposta.ErroCampoDto;
 import br.com.api.coffebank.dto.resposta.ErroRespostaDto;
 import br.com.api.coffebank.exception.CodigoInexistenteException;
+import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -86,13 +87,27 @@ public class GlobalExceptionHandler {
 	}
 	
 	//Esse Handler é disparado quando um parâmentro obrigatorio nao é enviado.
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErroRespostaDto> handleMissingParam(MissingServletRequestParameterException ex, HttpServletRequest request) {
-        ErroRespostaDto erro = new ErroRespostaDto(
-                "O parâmetro '" + ex.getParameterName() + "' é obrigatório!",
-                HttpStatus.BAD_REQUEST.value(),
-                request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
-    }
+	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+	public ResponseEntity<ErroRespostaDto> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
+	    ErroRespostaDto erro = new ErroRespostaDto(
+	        "Método " + ex.getMethod() + " não é suportado para esta URL.",
+	        HttpStatus.METHOD_NOT_ALLOWED.value(),
+	        request.getRequestURI()
+	    );
+	    return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(erro);
+	}
+	
+	@ExceptionHandler(CpfUrlDiferenteDoCorpoException.class)
+	public ResponseEntity<ErroRespostaDto> handleCodigoUrlDiferenteDoCorpo(
+	        CpfUrlDiferenteDoCorpoException ex, HttpServletRequest request) {
+
+	    ErroRespostaDto erro = new ErroRespostaDto(
+	            ex.getMessage(),
+	            HttpStatus.BAD_REQUEST.value(),
+	            request.getRequestURI()
+	    );
+
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+	}
 
 }
