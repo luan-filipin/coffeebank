@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import br.com.api.coffebank.entity.Cliente;
 import br.com.api.coffebank.exception.CodigoInexistenteException;
+import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
 import br.com.api.coffebank.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +30,12 @@ public class ClienteValidador {
 			throw new CodigoInexistenteException();
 		}
 	}
+	
+	public void validaCpfUrlIgualAoCorpo(String cpfCodigo, String cpfCorpo) {
+		if(!cpfCodigo.equals(cpfCorpo)) {
+			throw new CpfUrlDiferenteDoCorpoException();
+		}
+	}
+	
 	
 }
