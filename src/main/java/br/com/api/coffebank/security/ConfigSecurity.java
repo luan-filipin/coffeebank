@@ -12,14 +12,17 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class ConfigSecurity {
 
+	private static final String ENDPOINT_BASIC = "/api/cliente";
+	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity)throws Exception{
 		return httpSecurity.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/api/cliente").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/cliente").permitAll()
-						.requestMatchers(HttpMethod.DELETE, "/api/cliente").permitAll()
+						.requestMatchers(HttpMethod.POST, ENDPOINT_BASIC).permitAll()
+						.requestMatchers(HttpMethod.GET, ENDPOINT_BASIC + "/**").permitAll()
+						.requestMatchers(HttpMethod.DELETE,ENDPOINT_BASIC + "/**").permitAll()
+						.requestMatchers(HttpMethod.PUT,ENDPOINT_BASIC + "/**").permitAll()
 						.anyRequest().authenticated()
 						)
 				.build();
