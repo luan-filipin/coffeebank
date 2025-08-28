@@ -5,10 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.api.coffebank.dto.RequisicaoClienteDto;
@@ -32,15 +33,21 @@ public class ClienteController {
 	}
 	
 	
-	@GetMapping
-	public ResponseEntity<RespostaClienteDto> buscarClientePeloCodigo(@RequestParam Long codigo){
+	@GetMapping("/{codigo}")
+	public ResponseEntity<RespostaClienteDto> buscarClientePeloCodigo(@PathVariable Long codigo){
 		RespostaClienteDto cliente = clienteService.buscarClientePeloCodigo(codigo);
 		return ResponseEntity.ok(cliente);
 	}
 	
-	@DeleteMapping
-	public ResponseEntity<Void> deletaClientePeloCodigo(@RequestParam Long codigo){
+	@DeleteMapping("/{codigo}")
+	public ResponseEntity<Void> deletaClientePeloCodigo(@PathVariable Long codigo){
 		clienteService.deletaClientePeloCodigo(codigo);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+	
+	@PutMapping("/{codigo}")
+	public ResponseEntity<RespostaClienteDto> atualizarCliente(@RequestBody @Valid RequisicaoClienteDto dto, @PathVariable Long codigo){
+		RespostaClienteDto clienteAtualizado = clienteService.atualizaClientePeloCodigo(dto, codigo);
+		return ResponseEntity.ok(clienteAtualizado);
 	}
 }
