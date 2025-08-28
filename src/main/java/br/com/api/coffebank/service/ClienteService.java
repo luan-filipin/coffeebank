@@ -11,4 +11,5 @@ public interface ClienteService {
 	
 	void deletaClientePeloCodigo(Long codigo);
 	
+	RespostaClienteDto atualizaClientePeloCodigo(RequisicaoClienteDto dto, Long codigo);
 }
