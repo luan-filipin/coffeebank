@@ -32,8 +32,10 @@ import br.com.api.coffebank.entity.Endereco;
 import br.com.api.coffebank.entity.TipoSexo;
 import br.com.api.coffebank.exception.CodigoInexistenteException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
+import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;
 import br.com.api.coffebank.mapper.ClienteMapper;
 import br.com.api.coffebank.repository.ClienteRepository;
+import br.com.api.coffebank.service.event.producer.ClienteProducer;
 import br.com.api.coffebank.service.validador.ClienteValidador;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,6 +49,9 @@ class ClienteServiceTest {
 	
 	@Mock
 	private ClienteMapper clienteMapper;
+	
+	@Mock
+	private ClienteProducer clienteProducer;
 	
 	@InjectMocks
 	private ClienteServiceImp clienteServiceImp;
@@ -73,6 +78,7 @@ class ClienteServiceTest {
 		doNothing().when(clienteValidador).validaSeCpfJaExiste(dtoDadosPessoaisEntrada.cpf());
 		when(clienteMapper.toEntity(dtoEntrada)).thenReturn(clienteEntity);
 		when(clienteRepository.save(clienteEntity)).thenReturn(clienteEntity);
+		doNothing().when(clienteProducer).enviarClienteCriadoKafka(clienteEntity.getCodigoCliente());
 		when(clienteMapper.toDto(clienteEntity)).thenReturn(dtoEsperado);
 		
 		RespostaClienteDto resultado = clienteServiceImp.criarCliente(dtoEntrada);
@@ -132,7 +138,6 @@ class ClienteServiceTest {
 		
 		assertNotNull(resultado);
 		assertEquals(resultado, dtoEsperado);
-		assertEquals(resultado.codigoCliente(), dtoEsperado.codigoCliente());
 		
 		verify(clienteValidador).validaSeOCodigoDoClienteExiste(codigoCliente);
 		verify(clienteMapper).toDto(clienteEntity);
@@ -179,7 +184,93 @@ class ClienteServiceTest {
 			clienteServiceImp.deletaClientePeloCodigo(codigo);
 		});
 		
-		verify(clienteRepository, never()).deleteById(any());
-				
+		verify(clienteRepository, never()).deleteById(any());		
+	}
+	
+	@DisplayName("UPDATE -  Deve atualizar um cliente pelo codigo com sucesso.")
+	@Test 
+	void deveAtualizarClientePeloCodigoComSucesso() {
+		
+		Long codigoCliente = 1L;
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+	    LocalDateTime dataCriacao = LocalDateTime.of(2025, 8, 19, 12, 0);
+		
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		
+		DadosPessoais dadosPessoaisEntity = new DadosPessoais("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		Endereco enderecoEntity = new Endereco("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		Cliente clienteEntity = new Cliente(1L, dataCriacao, dadosPessoaisEntity, enderecoEntity);
+		
+		RespostaClienteDadosPessoaisDto dtoDadosPessoaisEsperado = new RespostaClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RespostaClienteEnderecoDto dtoEnderecoEsperado = new RespostaClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RespostaClienteDto dtoEsperado = new RespostaClienteDto(1L, dtoDadosPessoaisEsperado, dtoEnderecoEsperado);
+		
+		when(clienteValidador.validaSeOCodigoDoClienteExiste(codigoCliente)).thenReturn(clienteEntity);
+		doNothing().when(clienteValidador).validaCpfUrlIgualAoCorpo(clienteEntity.getDadosPessoais().getCpf(), dtoEntrada.dadosPessoais().cpf());
+		doNothing().when(clienteMapper).atualizaDto(dtoEntrada, clienteEntity);
+		when(clienteMapper.toDto(clienteEntity)).thenReturn(dtoEsperado);
+		
+		RespostaClienteDto resultado = clienteServiceImp.atualizaClientePeloCodigo(dtoEntrada, codigoCliente);
+		
+		assertNotNull(resultado);
+		assertEquals(resultado, dtoEsperado);
+	
+		verify(clienteValidador).validaSeOCodigoDoClienteExiste(codigoCliente);
+		verify(clienteValidador).validaCpfUrlIgualAoCorpo(clienteEntity.getDadosPessoais().getCpf(), dtoEntrada.dadosPessoais().cpf());
+		verify(clienteMapper).atualizaDto(dtoEntrada, clienteEntity);
+		verify(clienteMapper).toDto(clienteEntity);
+	}
+	
+	@DisplayName("UPDATE -  Deve lancar exception se codigo nao existir.")
+	@Test 
+	void deveLancarExceptionSeCodigoNaoExistir() {
+		
+		Long codigoCliente = 1L;
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+		
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		
+		doThrow(new CodigoInexistenteException()).when(clienteValidador).validaSeOCodigoDoClienteExiste(codigoCliente);
+		
+		assertThrows(CodigoInexistenteException.class, ()->{
+			clienteServiceImp.atualizaClientePeloCodigo(dtoEntrada, codigoCliente);
+		});
+		
+		verify(clienteValidador, never()).validaCpfUrlIgualAoCorpo(any(), any());
+		verify(clienteMapper, never()).atualizaDto(any(), any());
+		verify(clienteMapper, never()).toDto(any());
+		
+	}
+	
+	@DisplayName("UPDATE -  Deve lancar exception se cpf da url for diferente do passado no corpo.")
+	@Test 
+	void deveLancarExceptionSeCpfUrlDiferenteDoCorpo() {
+		
+		Long codigoCliente = 1L;
+	    LocalDate dataNascimento = LocalDate.of(1992, 5, 2);
+	    LocalDateTime dataCriacao = LocalDateTime.of(2025, 8, 19, 12, 0);
+		
+		RequisicaoClienteDadosPessoaisDto dtoDadosPessoaisEntrada = new RequisicaoClienteDadosPessoaisDto("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		RequisicaoClienteEnderecoDto dtoEnderecoEntrada = new RequisicaoClienteEnderecoDto("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		RequisicaoClienteDto dtoEntrada = new RequisicaoClienteDto(dtoDadosPessoaisEntrada, dtoEnderecoEntrada);
+		
+		DadosPessoais dadosPessoaisEntity = new DadosPessoais("Luan", "teste@teste.com", TipoSexo.MASCULINO, "12345678910", "33333333", dataNascimento, "Brasileiro");
+		Endereco enderecoEntity = new Endereco("Rua teste", "83", "BairroTeste", "Sao Paulo", "Casa", "Brasil");
+		Cliente clienteEntity = new Cliente(1L, dataCriacao, dadosPessoaisEntity, enderecoEntity);
+		
+		when(clienteValidador.validaSeOCodigoDoClienteExiste(codigoCliente)).thenReturn(clienteEntity);
+		doThrow(new CpfUrlDiferenteDoCorpoException()).when(clienteValidador).validaCpfUrlIgualAoCorpo(clienteEntity.getDadosPessoais().getCpf(), dtoEntrada.dadosPessoais().cpf());
+		
+		assertThrows(CpfUrlDiferenteDoCorpoException.class, ()->{
+			clienteServiceImp.atualizaClientePeloCodigo(dtoEntrada, codigoCliente);
+		});
+		
+		verify(clienteValidador).validaSeOCodigoDoClienteExiste(codigoCliente);
+		verify(clienteMapper, never()).atualizaDto(any(), any());
+		verify(clienteMapper, never()).toDto(any());
 	}
 }
