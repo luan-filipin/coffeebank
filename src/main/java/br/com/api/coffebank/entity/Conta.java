@@ -2,8 +2,13 @@ package br.com.api.coffebank.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,15 +27,17 @@ public class Conta {
 	@Column(name = "codigo_cliente", nullable = false)
 	private Long codigoCliente;
 	
-	@Column(name = "numero_conta", nullable = false)
+	@Column(name = "numero_conta", nullable = false, unique = true)
 	private String numeroConta;
 	
 	@Column(nullable = false)
 	private BigDecimal saldo;
 	
 	@Column(name = "tipo_conta", nullable = false)
+	@Enumerated(EnumType.STRING)
 	private TipoConta tipoConta;
 	
-	@Column(name = "data_criacao", nullable = false)
+	@CreationTimestamp
+	@Column(name = "data_criacao", nullable = false, updatable = false)
 	private LocalDateTime dataCriacao;
 }
