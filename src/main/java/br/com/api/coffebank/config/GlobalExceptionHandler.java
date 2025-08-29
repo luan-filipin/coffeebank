@@ -13,6 +13,9 @@ import br.com.api.coffebank.dto.resposta.ErroCampoDto;
 import br.com.api.coffebank.dto.resposta.ErroRespostaDto;
 import br.com.api.coffebank.exception.CodigoInexistenteException;
 import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;
+import br.com.api.coffebank.exception.ErroAoGerarTokenException;
+import br.com.api.coffebank.exception.TokenInvalidoOuExpiradoException;
+import br.com.api.coffebank.exception.UsuarioExisteException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -29,6 +32,24 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
 	}
 	
+	@ExceptionHandler(ErroAoGerarTokenException.class)
+	public ResponseEntity<ErroRespostaDto> handlerErroAoGerarToken(ErroAoGerarTokenException ex, HttpServletRequest request){
+		ErroRespostaDto erro = new ErroRespostaDto(
+				ex.getMessage(), 
+				HttpStatus.INTERNAL_SERVER_ERROR.value(), 
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
+	}
+	
+	@ExceptionHandler(TokenInvalidoOuExpiradoException.class)
+	public ResponseEntity<ErroRespostaDto> handlerTokenInvalidoOuExpirado(TokenInvalidoOuExpiradoException ex, HttpServletRequest request){
+		ErroRespostaDto erro = new ErroRespostaDto(
+				ex.getMessage(), 
+				HttpStatus.UNAUTHORIZED.value(), 
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(erro);
+	}
+	
 	@ExceptionHandler(CodigoInexistenteException.class)
 	public ResponseEntity<ErroRespostaDto> handlerCpfInexistente(CodigoInexistenteException ex, HttpServletRequest request){
 		ErroRespostaDto erro = new ErroRespostaDto(
@@ -40,6 +61,15 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(CpfJaExisteException.class)
 	public ResponseEntity<ErroRespostaDto> handlerValidaSeCpfJaExiste(CpfJaExisteException ex, HttpServletRequest request){
+		ErroRespostaDto erro = new ErroRespostaDto(
+				ex.getMessage(),
+				HttpStatus.CONFLICT.value(),
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+	
+	@ExceptionHandler(UsuarioExisteException.class)
+	public ResponseEntity<ErroRespostaDto> handlerUsuarioExiste(UsuarioExisteException ex, HttpServletRequest request){
 		ErroRespostaDto erro = new ErroRespostaDto(
 				ex.getMessage(),
 				HttpStatus.CONFLICT.value(),
