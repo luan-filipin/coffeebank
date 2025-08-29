@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 import br.com.api.coffebank.entity.Conta;
-import br.com.api.coffebank.entity.TipoConta;
+import br.com.api.coffebank.entity.enums.TipoConta;
 import br.com.api.coffebank.repository.ContaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +28,6 @@ public class ContaServiceImp implements ContaService{
 	}
 	
 	private String gerarNumeroConta(Long codigoCliente) {
-	    return String.format("%06d", codigoCliente); // ou qualquer regra que quiser
+	    return String.format("%06d", codigoCliente);
 	}
 }
