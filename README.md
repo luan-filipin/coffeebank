@@ -4,7 +4,7 @@ Este projeto é uma API REST desenvolvida em Java com Spring Boot, que simula pr
 ## ✅ Funcionalidades
 📖 Cliente: CRUD completo.
 
-👤 Usuários: CRUD completo.
+👤 Usuários: criar.
 
 🔍 Validações de regras de negócio:
 
