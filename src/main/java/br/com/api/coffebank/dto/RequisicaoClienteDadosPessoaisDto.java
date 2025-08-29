@@ -2,7 +2,7 @@ package br.com.api.coffebank.dto;
 
 import java.time.LocalDate;
 
-import br.com.api.coffebank.entity.TipoSexo;
+import br.com.api.coffebank.entity.enums.TipoSexo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
