@@ -29,7 +29,7 @@ import br.com.api.coffebank.dto.resposta.RespostaClienteEnderecoDto;
 import br.com.api.coffebank.entity.Cliente;
 import br.com.api.coffebank.entity.DadosPessoais;
 import br.com.api.coffebank.entity.Endereco;
-import br.com.api.coffebank.entity.TipoSexo;
+import br.com.api.coffebank.entity.enums.TipoSexo;
 import br.com.api.coffebank.exception.CodigoInexistenteException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
 import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;

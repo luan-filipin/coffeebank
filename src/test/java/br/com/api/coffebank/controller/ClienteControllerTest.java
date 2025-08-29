@@ -30,7 +30,7 @@ import br.com.api.coffebank.dto.RequisicaoClienteEnderecoDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDadosPessoaisDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteEnderecoDto;
-import br.com.api.coffebank.entity.TipoSexo;
+import br.com.api.coffebank.entity.enums.TipoSexo;
 import br.com.api.coffebank.service.ClienteService;
 
 @WebMvcTest(ClienteController.class)
