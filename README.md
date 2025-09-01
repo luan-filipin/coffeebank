@@ -6,13 +6,14 @@ Este projeto é uma API REST desenvolvida em Java com Spring Boot, que simula pr
 
 👤 Usuários: criar.
 
+💸 Transações: Depositar, sacar.
+
 🔍 Validações de regras de negócio:
-
-
-❌ Tratamento global de exceções com mensagens claras e padronizadas
+  - Tratamento global de exceções com mensagens claras e padronizadas
 
 🧪 Testes unitários e de integração com JUnit 5 e Mockito
 
+🔑 Para todas as requisições é necessario a autenticação, com exceção na criação do login e senha.
 
 ## 🛠️ Tecnologias utilizadas
 Java 24
@@ -148,6 +149,6 @@ Sacar valor da conta.
 ```
 {
     "codigoCliente": 1,
-    "valor": 152.23,
+    "valor": 90.00,
 }
 ```
