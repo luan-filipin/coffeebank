@@ -14,6 +14,7 @@ import br.com.api.coffebank.dto.resposta.ErroRespostaDto;
 import br.com.api.coffebank.exception.CodigoInexistenteException;
 import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;
 import br.com.api.coffebank.exception.ErroAoGerarTokenException;
+import br.com.api.coffebank.exception.NumeroDaContaNaoExisteException;
 import br.com.api.coffebank.exception.TokenInvalidoOuExpiradoException;
 import br.com.api.coffebank.exception.UsuarioExisteException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
@@ -52,6 +53,15 @@ public class GlobalExceptionHandler {
 	
 	@ExceptionHandler(CodigoInexistenteException.class)
 	public ResponseEntity<ErroRespostaDto> handlerCpfInexistente(CodigoInexistenteException ex, HttpServletRequest request){
+		ErroRespostaDto erro = new ErroRespostaDto(
+				ex.getMessage(), 
+				HttpStatus.NOT_FOUND.value(), 
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+	}
+	
+	@ExceptionHandler(NumeroDaContaNaoExisteException.class)
+	public ResponseEntity<ErroRespostaDto> handlerNumeroDaContaNaoExiste(NumeroDaContaNaoExisteException ex, HttpServletRequest request){
 		ErroRespostaDto erro = new ErroRespostaDto(
 				ex.getMessage(), 
 				HttpStatus.NOT_FOUND.value(), 
