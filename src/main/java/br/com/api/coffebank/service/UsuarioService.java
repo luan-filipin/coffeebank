@@ -25,12 +25,12 @@ public class UsuarioService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return usuarioRepository.findByUsuario(username);
+		return usuarioRepository.findByUsername(username);
 	}
 
 	@Transactional
 	public void criarUsuario(RequisicaoUsuarioDto usuarioDto) {
-		usuarioValidador.validaSeUsuarioExiste(usuarioDto.usuario());
+		usuarioValidador.validaSeUsuarioExiste(usuarioDto.username());
 		Usuario usuario = usuarioMapper.toEntity(usuarioDto);
 		usuario.setSenha(passwordEncoder.encode(usuario.getPassword()));
 		usuarioRepository.save(usuario);
