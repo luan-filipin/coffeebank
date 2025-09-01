@@ -43,7 +43,7 @@ Docker
 
 ## 📡Endopoints Cliente:
 Cadastrar cliente.
-- Ao realizar o cadastro do cliente, o sistema de forma automatica utilizando kafka realiza a criação da conta Bancaria.
+- Ao realizar o cadastro do cliente, o sistema utilizando kafka para dispara um evento para criar a conta
 - `POST /api/cliente`
 ```
 {
@@ -73,6 +73,7 @@ Pesquisa cliente.
   
 Deleta cliente.
 - Informar o codigo do cliente na url para deletar o usuario.
+- Ao deletar o cliente, o sistema utiliza o Kafka para dispara um evento para deletar a conta.
 - `DELETE /api/cliente/1`
 
 Atualiza cliente.
@@ -105,7 +106,7 @@ Atualiza cliente.
 
 Criar usuario.
 - Na criação voce precisa informar a role, pois o acesso tambem é limitado ao mesmo e nao basta der só o token.
-- `POST /usuario`
+- `POST /api/usuario`
 ```
 {
     "usuario": "João",
@@ -124,3 +125,29 @@ Gerar token.
 }
 ```
 
+## 📡Endopoints Transações:
+
+Depositar saldo na conta.
+Ao enviar o body para a rota, é criado um evento Kafka. O consumer processa o evento e dispara o service para adicionar o valor na conta.
+- Validações:
+  - O valor não pode ser null enm negatio. 
+- `POST /api//transacoes/depositar`
+```
+{
+    "codigoCliente": 1,
+    "valor": 152.23,
+}
+```
+
+Sacar valor da conta.
+- Ao enviar o body para a rota, é criado um evento Kafka. O consumer processa o evento e dispara o service para subtrair o valor da conta.
+- Validações:
+  - O valor não pode ser null nem negativo.
+  - Não é permitido sacar um valor maior que o saldo disponível.
+- `POST /api//transacoes/sacar`
+```
+{
+    "codigoCliente": 1,
+    "valor": 152.23,
+}
+```
