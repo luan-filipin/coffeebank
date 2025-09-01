@@ -25,10 +25,10 @@ public class Conta {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Column(name = "codigo_cliente", nullable = false)
+	@Column(name = "codigo_cliente", nullable = false, unique = true)
 	private Long codigoCliente;
 	
-	@Column(name = "numero_conta", nullable = false, unique = true)
+	@Column(name = "numero_conta", nullable = false)
 	private String numeroConta;
 	
 	@Column(nullable = false)
