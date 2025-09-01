@@ -41,6 +41,7 @@ public class ClienteServiceImp implements ClienteService{
 	public void deletaClientePeloCodigo(Long codigo) {
 		clienteValidador.validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
 		clienteRepository.deleteById(codigo);
+		clienteProducer.enviarClienteDeletadoKafka(codigo);
 	}
 
 	@Transactional
