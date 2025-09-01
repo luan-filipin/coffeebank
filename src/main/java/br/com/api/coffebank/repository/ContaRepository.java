@@ -6,5 +6,7 @@ import br.com.api.coffebank.entity.Conta;
 
 public interface ContaRepository extends JpaRepository<Conta, Long>{
 
-	boolean existsByNumeroConta(String numeroConta);
+	boolean existsByCodigoCliente(Long codigoCliente);
+	
+	void deleteByCodigoCliente(Long codigoCliente);
 }
