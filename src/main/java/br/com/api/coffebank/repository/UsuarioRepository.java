@@ -7,7 +7,7 @@ import br.com.api.coffebank.entity.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
 
-	UserDetails findByUsuario(String usuario);
+	UserDetails findByUsername(String usuario);
 	
-	boolean existsByUsuario(String usuario);
+	boolean existsByUsername(String usuario);
 }
