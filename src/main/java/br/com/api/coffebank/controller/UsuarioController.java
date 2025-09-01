@@ -16,6 +16,7 @@ import br.com.api.coffebank.dto.resposta.RespostaTokenDto;
 import br.com.api.coffebank.entity.Usuario;
 import br.com.api.coffebank.service.TokenService;
 import br.com.api.coffebank.service.UsuarioService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -26,11 +27,11 @@ public class UsuarioController {
 	
 	private final AuthenticationManager authenticationManager;
 	private final TokenService tokenService;
-	private final UsuarioService usuarioService;
+	private final UsuarioService usuarioService; 
 	
 	@PostMapping("/token")
 	public ResponseEntity<RespostaTokenDto> token(@RequestBody @Valid UsuarioDto dto) {
-		var usernamePassword = new UsernamePasswordAuthenticationToken(dto.usuario(), dto.senha());
+		var usernamePassword = new UsernamePasswordAuthenticationToken(dto.username(), dto.senha());
 		var auth = this.authenticationManager.authenticate(usernamePassword);
 		var user = (Usuario)auth.getPrincipal();
 		String token = tokenService.gerarToken(user);
