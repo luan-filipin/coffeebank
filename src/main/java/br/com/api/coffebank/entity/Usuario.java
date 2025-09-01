@@ -28,7 +28,7 @@ public class Usuario implements UserDetails{
 	private Long id;
 	
 	@Column(nullable = false)
-	private String usuario;
+	private String username;
 	
 	@Column(nullable = false)
 	private String senha;
@@ -53,7 +53,7 @@ public class Usuario implements UserDetails{
 
 	@Override
 	public String getUsername() {
-		return usuario;
+		return username;
 	}
 	
 	
