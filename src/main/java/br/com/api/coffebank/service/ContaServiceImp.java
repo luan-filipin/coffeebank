@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import br.com.api.coffebank.entity.Conta;
 import br.com.api.coffebank.entity.enums.TipoConta;
 import br.com.api.coffebank.repository.ContaRepository;
+import br.com.api.coffebank.service.validador.ContaValidador;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class ContaServiceImp implements ContaService{
 
 	private final ContaRepository contaRepository;
+	private final ContaValidador contaValidador;
 
 	@Transactional
 	@Override
@@ -26,6 +28,14 @@ public class ContaServiceImp implements ContaService{
 		conta.setTipoConta(TipoConta.CORRENTE);
 		contaRepository.save(conta);
 	}
+	
+	@Transactional
+	@Override
+	public void deletarConta(Long codigoCliente) {
+		contaValidador.validaSeContaExiste(codigoCliente);
+		contaRepository.deleteByCodigoCliente(codigoCliente);
+	}
+	
 	
 	private String gerarNumeroConta(Long codigoCliente) {
 	    return String.format("%06d", codigoCliente);
