@@ -13,8 +13,12 @@ public interface ClienteMapper {
 
 	RespostaClienteDto toDto(Cliente entity);
 	
+	@Mapping(target = "codigoCliente", ignore = true)
+	@Mapping(target = "dataCriacao", ignore = true)
 	Cliente toEntity(RequisicaoClienteDto dto);
 	
+	@Mapping(target = "codigoCliente", ignore = true)
+    @Mapping(target = "dataCriacao", ignore = true)
 	@Mapping(target = "dadosPessoais.cpf", ignore = true)
 	void atualizaDto(RequisicaoClienteDto dto, @MappingTarget Cliente entity);
 }
