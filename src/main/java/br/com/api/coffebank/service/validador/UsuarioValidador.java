@@ -13,7 +13,7 @@ public class UsuarioValidador {
 	private final UsuarioRepository usuarioRepository;
 	
 	public void validaSeUsuarioExiste(String usuario) {
-		if(usuarioRepository.existsByUsuario(usuario)) {
+		if(usuarioRepository.existsByUsername(usuario)) {
 			throw new UsuarioExisteException();
 		}
 	}
