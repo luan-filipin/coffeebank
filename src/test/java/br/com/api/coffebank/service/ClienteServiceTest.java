@@ -166,11 +166,13 @@ class ClienteServiceTest {
 		
 		doNothing().when(clienteValidador).validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
 		doNothing().when(clienteRepository).deleteById(codigo);
+		doNothing().when(clienteProducer).enviarClienteDeletadoKafka(codigo);
 		
 		clienteServiceImp.deletaClientePeloCodigo(codigo);
 		
 		verify(clienteValidador).validaSeOCodigoExisteMasNaoRetornaEntity(codigo);
 		verify(clienteRepository).deleteById(codigo);
+		verify(clienteProducer).enviarClienteDeletadoKafka(codigo);
 	}
 	
 	@DisplayName("DELETE -  Deve lançar exception se o cliente nao existir.")
