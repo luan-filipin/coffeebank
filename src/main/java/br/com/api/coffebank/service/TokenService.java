@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
@@ -19,8 +20,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class TokenService {
-
+	
 	private String secretKey = "secret";
+	
+	public TokenService(String secretKey) {
+		this.secretKey = secretKey;
+	}
 	
 	public String gerarToken(Usuario usuario) {
 		try {
@@ -30,8 +35,7 @@ public class TokenService {
 					.withSubject(usuario.getUsername())
 					.withExpiresAt(genExpirationDate())
 					.sign(algorithm);
-			
-		} catch (JWTCreationException exception) {
+		} catch (JWTCreationException | IllegalArgumentException exception) {
 			throw new ErroAoGerarTokenException(exception);
 		}
 	}
