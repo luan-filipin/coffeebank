@@ -36,8 +36,27 @@ public class ContaServiceImp implements ContaService{
 		contaRepository.deleteByCodigoCliente(codigoCliente);
 	}
 	
+	@Transactional
+	@Override
+	public void depositarValor(Long codigoCliente, BigDecimal valor) {
+		Conta conta = contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente);
+		contaValidador.validaSeValorNullOuNegativo(valor);
+		conta.setSaldo(conta.getSaldo().add(valor));
+	}
+	
+	@Transactional
+	@Override
+	public void sacarValor(Long codigoCliente, BigDecimal valor) {
+		Conta conta = contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente);
+		contaValidador.validaSeValorNullOuNegativo(valor);	
+		contaValidador.validaSeSaldoSuficienteParaSacar(conta.getSaldo(), valor);
+		conta.setSaldo(conta.getSaldo().subtract(valor));
+	}
+	
+	
 	
 	private String gerarNumeroConta(Long codigoCliente) {
 	    return String.format("%06d", codigoCliente);
 	}
+
 }
