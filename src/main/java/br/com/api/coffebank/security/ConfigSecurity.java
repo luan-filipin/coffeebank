@@ -27,8 +27,8 @@ public class ConfigSecurity {
 		return httpSecurity.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
-						.requestMatchers(HttpMethod.POST, "/usuario/token").permitAll()
-						.requestMatchers(HttpMethod.POST, "/usuario/**").permitAll().anyRequest()
+						.requestMatchers(HttpMethod.POST, "/api/usuario/token").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/usuario/**").permitAll().anyRequest()
 						.authenticated())
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 				.build();
