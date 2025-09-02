@@ -15,8 +15,10 @@ import br.com.api.coffebank.exception.CodigoInexistenteException;
 import br.com.api.coffebank.exception.CpfUrlDiferenteDoCorpoException;
 import br.com.api.coffebank.exception.ErroAoGerarTokenException;
 import br.com.api.coffebank.exception.NumeroDaContaNaoExisteException;
+import br.com.api.coffebank.exception.SaldoInsuficienteParaSaqueException;
 import br.com.api.coffebank.exception.TokenInvalidoOuExpiradoException;
 import br.com.api.coffebank.exception.UsuarioExisteException;
+import br.com.api.coffebank.exception.ValorNegativoException;
 import br.com.api.coffebank.exception.CpfJaExisteException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -60,6 +62,15 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
 	}
 	
+	@ExceptionHandler(SaldoInsuficienteParaSaqueException.class)
+	public ResponseEntity<ErroRespostaDto> handlerSaldoInsuficienteParaSaque(SaldoInsuficienteParaSaqueException ex, HttpServletRequest request){
+		ErroRespostaDto erro = new ErroRespostaDto(
+				ex.getMessage(), 
+				HttpStatus.BAD_REQUEST.value(), 
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+	}
+	
 	@ExceptionHandler(NumeroDaContaNaoExisteException.class)
 	public ResponseEntity<ErroRespostaDto> handlerNumeroDaContaNaoExiste(NumeroDaContaNaoExisteException ex, HttpServletRequest request){
 		ErroRespostaDto erro = new ErroRespostaDto(
@@ -76,6 +87,15 @@ public class GlobalExceptionHandler {
 				HttpStatus.CONFLICT.value(),
 				request.getRequestURI());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
+	}
+	
+	@ExceptionHandler(ValorNegativoException.class)
+	public ResponseEntity<ErroRespostaDto> handlerValorNegativo(ValorNegativoException ex, HttpServletRequest request){
+		ErroRespostaDto erro = new ErroRespostaDto(
+				ex.getMessage(),
+				HttpStatus.BAD_REQUEST.value(),
+				request.getRequestURI());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
 	}
 	
 	@ExceptionHandler(UsuarioExisteException.class)
