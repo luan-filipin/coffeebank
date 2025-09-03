@@ -1,6 +1,5 @@
 package br.com.api.coffebank.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,7 +11,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.api.coffebank.entity.Conta;
 import br.com.api.coffebank.entity.enums.TipoConta;
 import br.com.api.coffebank.exception.NumeroDaContaNaoExisteException;
+import br.com.api.coffebank.exception.ValorNegativoException;
 import br.com.api.coffebank.repository.ContaRepository;
 import br.com.api.coffebank.service.validador.ContaValidador;
 
@@ -90,5 +89,69 @@ class ContaServiceTest {
 		});
 		
 		verify(contaRepository, never()).deleteByCodigoCliente(any());
+	}
+	
+	@DisplayName("Deve depositar valor com sucesso.")
+	@Test
+	void deveDepositarValorComSucesso() {
+		
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(100);
+		
+		Conta conta = new Conta();
+		conta.setId(1L);
+		conta.setCodigoCliente(1L);
+		conta.setNumeroConta("123456");
+		conta.setSaldo(BigDecimal.valueOf(50));
+		conta.setTipoConta(TipoConta.CORRENTE);
+		
+		when(contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente)).thenReturn(conta);
+		doNothing().when(contaValidador).validaSeValorNullOuNegativo(valor);
+		
+		contaServiceImp.depositarValor(codigoCliente, valor);
+		
+		assertEquals(BigDecimal.valueOf(150), conta.getSaldo());
+		
+		verify(contaValidador).validaSeContaExisteERetornaEntidade(codigoCliente);
+		verify(contaValidador).validaSeValorNullOuNegativo(valor);
+	}
+	
+	@DisplayName("Deve lançar exception se a conta nao existir.")
+	@Test
+	void deveLancarExceptionSeContaNaoExistirParaDeposito() {
+		
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(100);
+		
+		doThrow(new NumeroDaContaNaoExisteException()).when(contaValidador).validaSeContaExisteERetornaEntidade(codigoCliente);
+		
+		assertThrows(NumeroDaContaNaoExisteException.class, ()->{
+			contaServiceImp.depositarValor(codigoCliente, valor);
+		});
+		
+		verify(contaValidador, never()).validaSeValorNullOuNegativo(any());
+	}
+	
+	@DisplayName("Deve lançar exception se o valor for negativo ou null")
+	@Test
+	void deveLancarExceptionSeVaorNegativoOuNull() {
+		
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(-100);
+		
+		Conta conta = new Conta();
+		conta.setId(1L);
+		conta.setCodigoCliente(1L);
+		conta.setNumeroConta("123456");
+		conta.setSaldo(BigDecimal.valueOf(50));
+		conta.setTipoConta(TipoConta.CORRENTE);
+		
+		when(contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente)).thenReturn(conta);
+		doThrow(new ValorNegativoException()).when(contaValidador).validaSeValorNullOuNegativo(valor);
+		
+		assertThrows(ValorNegativoException.class, ()->{
+			contaServiceImp.depositarValor(codigoCliente, valor);
+		});
+
 	}
 }
