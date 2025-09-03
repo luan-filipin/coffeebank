@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.api.coffebank.entity.Conta;
 import br.com.api.coffebank.entity.enums.TipoConta;
 import br.com.api.coffebank.exception.NumeroDaContaNaoExisteException;
+import br.com.api.coffebank.exception.SaldoInsuficienteParaSaqueException;
 import br.com.api.coffebank.exception.ValorNegativoException;
 import br.com.api.coffebank.repository.ContaRepository;
 import br.com.api.coffebank.service.validador.ContaValidador;
@@ -152,6 +153,95 @@ class ContaServiceTest {
 		assertThrows(ValorNegativoException.class, ()->{
 			contaServiceImp.depositarValor(codigoCliente, valor);
 		});
-
+	}
+	
+	@DisplayName("Deve sacar o valor com sucesso.")
+	@Test
+	void deveSacarValorComSucesso() {
+		
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(50);
+		
+		Conta conta = new Conta();
+		conta.setId(1L);
+		conta.setCodigoCliente(1L);
+		conta.setNumeroConta("123456");
+		conta.setSaldo(BigDecimal.valueOf(100));
+		conta.setTipoConta(TipoConta.CORRENTE);
+		
+		when(contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente)).thenReturn(conta);
+		doNothing().when(contaValidador).validaSeValorNullOuNegativo(valor);
+		doNothing().when(contaValidador).validaSeSaldoSuficienteParaSacar(conta.getSaldo(), valor);
+		
+		contaServiceImp.sacarValor(codigoCliente, valor);
+		
+		assertEquals(BigDecimal.valueOf(50), conta.getSaldo());
+		
+		verify(contaValidador).validaSeContaExisteERetornaEntidade(codigoCliente);
+		verify(contaValidador).validaSeValorNullOuNegativo(valor);
+		verify(contaValidador).validaSeSaldoSuficienteParaSacar(BigDecimal.valueOf(100), valor);
+		
+	}
+	
+	@DisplayName("Deve lançar exception se conta nao existir")
+	@Test
+	
+	void deveLancarExceptionSeContaNaoExistirParaSacar() {
+		
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(100);
+		
+		doThrow(new NumeroDaContaNaoExisteException()).when(contaValidador).validaSeContaExisteERetornaEntidade(codigoCliente);
+		
+		assertThrows(NumeroDaContaNaoExisteException.class, ()->{
+			contaServiceImp.depositarValor(codigoCliente, valor);
+		});
+		
+		verify(contaValidador, never()).validaSeValorNullOuNegativo(any());
+	}
+	
+	@DisplayName("Deve lançar exception se valor for null ou negativo")
+	@Test
+	void deveLancarExceptioSeValorNegativoOuNullParaSacar() {
+	
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(-100);
+		
+		Conta conta = new Conta();
+		conta.setId(1L);
+		conta.setCodigoCliente(1L);
+		conta.setNumeroConta("123456");
+		conta.setSaldo(BigDecimal.valueOf(50));
+		conta.setTipoConta(TipoConta.CORRENTE);
+		
+		when(contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente)).thenReturn(conta);
+		doThrow(new ValorNegativoException()).when(contaValidador).validaSeValorNullOuNegativo(valor);
+		
+		assertThrows(ValorNegativoException.class, ()->{
+			contaServiceImp.depositarValor(codigoCliente, valor);
+		});
+	}
+	
+	@DisplayName("Deve lançar exception se saldo nao for suficiente para saque.")
+	@Test
+	void deveLancarExpcetionSeSaldoNaoForSuficienteParaSaque() {
+		
+		Long codigoCliente = 1L;
+		BigDecimal valor = BigDecimal.valueOf(100);
+		
+		Conta conta = new Conta();
+		conta.setId(1L);
+		conta.setCodigoCliente(1L);
+		conta.setNumeroConta("123456");
+		conta.setSaldo(BigDecimal.valueOf(50));
+		conta.setTipoConta(TipoConta.CORRENTE);
+		
+		when(contaValidador.validaSeContaExisteERetornaEntidade(codigoCliente)).thenReturn(conta);
+		doNothing().when(contaValidador).validaSeValorNullOuNegativo(valor);
+		doThrow(new SaldoInsuficienteParaSaqueException()).when(contaValidador).validaSeSaldoSuficienteParaSacar(conta.getSaldo(), valor);
+		
+		assertThrows(SaldoInsuficienteParaSaqueException.class, ()->{
+			contaServiceImp.sacarValor(codigoCliente, valor);
+		});
 	}
 }
