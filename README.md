@@ -25,6 +25,7 @@ API REST desenvolvida em **Java com Spring Boot**, que simula procedimentos banc
 - **JWT**
 - **Docker**
 - **JUnit 5 + Mockito**
+- **Swagger/OpenAPI**
 
 ---
 
@@ -139,3 +140,8 @@ Sacar valor da conta.
     "valor": 90.00,
 }
 ```
+
+## 📚Documentação:
+- Após subir o projeto acesse http://localhost:8080/swagger-ui/index.html
+<img width="853" height="637" alt="image" src="https://github.com/user-attachments/assets/7622de09-167d-4cee-8003-f2708820b799" />
+
