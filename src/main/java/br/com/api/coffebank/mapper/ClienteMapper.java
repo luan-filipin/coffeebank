@@ -8,9 +8,10 @@ import br.com.api.coffebank.dto.RequisicaoClienteDto;
 import br.com.api.coffebank.dto.resposta.RespostaClienteDto;
 import br.com.api.coffebank.entity.Cliente;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = DadosPessoaisMapper.class)
 public interface ClienteMapper {
 
+	@Mapping(target = "dadosPessoais", source = "dadosPessoais") 
 	RespostaClienteDto toDto(Cliente entity);
 	
 	@Mapping(target = "codigoCliente", ignore = true)
