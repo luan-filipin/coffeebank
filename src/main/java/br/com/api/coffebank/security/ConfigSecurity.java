@@ -27,8 +27,15 @@ public class ConfigSecurity {
 		return httpSecurity.csrf(csrf -> csrf.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
+						.requestMatchers("/swagger-ui/**", // Interface do Swagger.
+										"/swagger-ui.html", // Interface do Swagger.
+										"/swagger-resources/**", // Recursos do Swagger.
+										"/webjars/**",// Recursos do Swagger
+										"/v3/api-docs/**", // Documentação da API.
+										"/v3/api-docs").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/usuario/token").permitAll()
-						.requestMatchers(HttpMethod.POST, "/api/usuario/**").permitAll().anyRequest()
+						.requestMatchers(HttpMethod.POST, "/api/usuario/**").permitAll()
+						.anyRequest()
 						.authenticated())
 				.addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
 				.build();
