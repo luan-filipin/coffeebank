@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import br.com.api.coffebank.entity.enums.TipoSexo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -16,6 +17,7 @@ public record RequisicaoClienteDadosPessoaisDto(
 		String nome,
 		
 		@Schema(description = "Email", example = "joao@gmail.com")
+		@Email(message = "O email precisa esta em um formato valido")
 		@NotBlank(message = "O campo 'email' é obrigatorio!") 
 		String email,
 		
