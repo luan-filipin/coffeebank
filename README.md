@@ -30,6 +30,11 @@ API REST desenvolvida em **Java com Spring Boot**, que simula procedimentos banc
 - **Grafana**
 ---
 
+## 📦 Docker
+- Este projeto utiliza Docker e Docker Compose, garantindo execução consistente e simplificada de todos os serviços.
+
+<img width="393" height="544" alt="image" src="https://github.com/user-attachments/assets/5c3a472b-ed34-4bbb-a1ce-3181a5d3a86f" />
+
 ## 📡 Endpoints
 
 ### 👤 Cliente
