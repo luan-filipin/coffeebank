@@ -11,6 +11,7 @@ API REST desenvolvida em **Java com Spring Boot**, que simula procedimentos banc
   - Tratamento global de exceções com mensagens claras e padronizadas.
 - 🧪 **Testes unitários e de integração:** com **JUnit 5** e **Mockito**.
 - 🔑 **Autenticação:** todas as requisições exigem autenticação, exceto a criação de login e senha.
+- Grafana para observabilidade das metricas da API.
 
 ---
 
@@ -26,7 +27,7 @@ API REST desenvolvida em **Java com Spring Boot**, que simula procedimentos banc
 - **Docker**
 - **JUnit 5 + Mockito**
 - **Swagger/OpenAPI**
-
+- **Grafana**
 ---
 
 ## 📡 Endpoints
@@ -144,4 +145,8 @@ Sacar valor da conta.
 ## 📚Documentação:
 - Após subir o projeto acesse http://localhost:8080/swagger-ui/index.html
 <img width="853" height="637" alt="image" src="https://github.com/user-attachments/assets/7622de09-167d-4cee-8003-f2708820b799" />
+
+## 📊Grafana
+- após subir o projeto acesse http://localhost:3000/dashboards
+<img width="1582" height="777" alt="image" src="https://github.com/user-attachments/assets/caa68cea-18c2-4bba-a570-3a9447fcefa0" />
 
