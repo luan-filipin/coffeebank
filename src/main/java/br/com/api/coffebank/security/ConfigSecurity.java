@@ -34,6 +34,7 @@ public class ConfigSecurity {
 										"/v3/api-docs/**", // Documentação da API.
 										"/v3/api-docs").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/usuario/token").permitAll()
+						.requestMatchers("/actuator/prometheus", "/actuator/health").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/usuario/**").permitAll()
 						.anyRequest()
 						.authenticated())
