@@ -44,6 +44,7 @@ public class ClienteServiceImp implements ClienteService{
 		clienteProducer.enviarClienteDeletadoKafka(codigo);
 	}
 
+	
 	@Transactional
 	@Override
 	public RespostaClienteDto atualizaClientePeloCodigo(RequisicaoClienteDto dto, Long codigo) {
