@@ -18,6 +18,7 @@ public class ContaServiceImp implements ContaService{
 	private final ContaRepository contaRepository;
 	private final ContaValidador contaValidador;
 
+	
 	@Transactional
 	@Override
 	public void criarConta(Long codigoCliente) {
