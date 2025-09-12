@@ -25,7 +25,7 @@ API REST desenvolvida em **Java com Spring Boot**, que simula procedimentos banc
 - **Kafka**
 - **JWT**
 - **Docker**
-- **JUnit 5 + Mockito**
+- **JUnit 5, Mockito, Testcontainers (PostgreSQL) – testes unitários e de integração**
 - **Swagger/OpenAPI**
 - **Grafana**
 ---
